@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Valentine</title>
   <style>
-    /* Layout */
     body{
       margin:0;
       height:100vh;
@@ -28,7 +27,7 @@
       padding:34px 22px 22px;
     }
 
-    /* Falling hearts layer */
+    /* Falling hearts */
     .hearts{
       position:absolute;
       inset:0;
@@ -36,41 +35,27 @@
       overflow:hidden;
       z-index:1;
     }
-
     .fall{
       position:absolute;
-      top:-60px;
+      top:-70px;
       animation-name: fall;
       animation-timing-function: linear;
       animation-iteration-count: infinite;
       opacity:.95;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.05));
     }
-
     @keyframes fall{
-      0%   { transform: translateY(-60px) translateX(0) rotate(0deg); opacity:0; }
+      0%   { transform: translateY(-70px) translateX(0) rotate(0deg); opacity:0; }
       10%  { opacity:1; }
-      100% { transform: translateY(520px) translateX(40px) rotate(25deg); opacity:0; }
+      100% { transform: translateY(540px) translateX(40px) rotate(25deg); opacity:0; }
     }
 
-    /* Top beating heart */
-    .top{
-      position:relative;
-      z-index:2;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
+    /* Beating hearts */
     .beat{
       display:inline-block;
       transform-origin:center;
       animation: beat 1s infinite;
-      font-size:22px;
     }
-
     @keyframes beat{
       0%, 100% { transform: scale(1); }
       20% { transform: scale(1.25); }
@@ -85,6 +70,11 @@
       color:#d6336c;
       font-size:34px;
       line-height:1.15;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
     p{
@@ -97,10 +87,20 @@
       line-height:1.5;
     }
 
+    .prompt{
+      position:relative;
+      z-index:2;
+      margin-top:18px;
+      font-size:16px;
+      color:#8a2250;
+      min-height:24px;
+      font-weight:700;
+    }
+
     .btns{
       position:relative;
       z-index:2;
-      margin-top:26px;
+      margin-top:18px;
       display:flex;
       gap:16px;
       justify-content:center;
@@ -111,20 +111,19 @@
       display:inline-block;
       padding:12px 26px;
       border-radius:999px;
-      font-weight:700;
+      font-weight:800;
       text-decoration:none;
       border:2px solid #d6336c;
       transition: transform .08s ease;
       user-select:none;
+      cursor:pointer;
     }
-
     .btn:active{ transform: scale(.98); }
 
     .btn.primary{
       background:#d6336c;
       color:#fff;
     }
-
     .btn.outline{
       background:#fff;
       color:#d6336c;
@@ -133,7 +132,7 @@
     .sig{
       position:relative;
       z-index:2;
-      margin-top:22px;
+      margin-top:18px;
       color:#6a1b3a;
       font-size:16px;
     }
@@ -143,9 +142,8 @@
 <body>
   <div class="card">
 
-    <!-- Falling hearts -->
-    <div class="hearts">
-      <!-- Tu peux en rajouter autant que tu veux -->
+    <!-- Falling hearts layer -->
+    <div class="hearts" aria-hidden="true">
       <div class="fall" style="left:8%;  font-size:22px; animation-duration:6.2s; animation-delay:-1.1s;">💗</div>
       <div class="fall" style="left:18%; font-size:18px; animation-duration:7.4s; animation-delay:-3.0s;">❤️</div>
       <div class="fall" style="left:30%; font-size:26px; animation-duration:5.8s; animation-delay:-2.2s;">💖</div>
@@ -156,14 +154,12 @@
       <div class="fall" style="left:90%; font-size:21px; animation-duration:8.4s; animation-delay:-6.2s;">💕</div>
     </div>
 
-    <!-- Header -->
-    <div class="top">
-      <span class="beat">❤️</span>
-      <span style="color:#d6336c; font-weight:800;">Would you be my Valentine?</span>
-      <span class="beat">❤️</span>
-    </div>
-
-    <h1>Would you be my Valentine? 💌</h1>
+    <!-- Title (only the big one) -->
+    <h1>
+      <span class="beat" style="font-size:28px;">❤️</span>
+      Would you be my Valentine?
+      <span class="beat" style="font-size:28px;">❤️</span>
+    </h1>
 
     <p>
       Joyeuse Saint-Valentin mon amour 💖<br><br>
@@ -171,12 +167,58 @@
       mon cœur bat exactement au même rythme que le tien.
     </p>
 
+    <div class="prompt" id="prompt"></div>
+
     <div class="btns">
-      <a class="btn primary" href="#">Oui</a>
-      <a class="btn outline" href="#">Oui</a>
+      <button class="btn primary" id="yesBtn" type="button">Yes</button>
+      <button class="btn outline" id="yesBtn2" type="button">Yes</button>
     </div>
 
     <div class="sig">— Joé</div>
   </div>
+
+  <script>
+    // Step flow:
+    // 0: (initial) -> click Yes -> "are you sure?"
+    // 1: click Yes -> "are you really sure?"
+    // 2: click Yes -> "so love me forever"
+    // 3: final (lock)
+    let step = 0;
+
+    const promptEl = document.getElementById("prompt");
+    const yes1 = document.getElementById("yesBtn");
+    const yes2 = document.getElementById("yesBtn2");
+
+    function setPrompt(text){
+      promptEl.textContent = text;
+    }
+
+    function advance(){
+      step += 1;
+
+      if(step === 1){
+        setPrompt("Are you sure?");
+      } else if(step === 2){
+        setPrompt("Are you really sure?");
+      } else {
+        setPrompt("So… love me forever 💗");
+        // lock buttons
+        yes1.textContent = "💘";
+        yes2.textContent = "💘";
+        yes1.disabled = true;
+        yes2.disabled = true;
+        yes1.style.opacity = "0.7";
+        yes2.style.opacity = "0.7";
+        yes1.style.cursor = "default";
+        yes2.style.cursor = "default";
+      }
+    }
+
+    // Start blank
+    setPrompt("");
+
+    yes1.addEventListener("click", advance);
+    yes2.addEventListener("click", advance);
+  </script>
 </body>
 </html>
