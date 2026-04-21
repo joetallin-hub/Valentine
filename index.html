@@ -1,180 +1,203 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Valentine</title>
-  <style>
-    body{
-      margin:0;
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fff0f6;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+import React, { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ChevronLeft, ChevronRight, Camera } from "lucide-react";
 
-    .card{
-      position:relative;
-      width:min(560px, 92vw);
-      height:420px;
-      background:#ffe3ec;
-      border-radius:22px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
-      overflow:hidden;
-      text-align:center;
-      padding:34px 22px 22px;
-    }
+const pagesData = [
+  {
+    type: "cover",
+    title: "Pour toi ❤️",
+    subtitle: "Un petit livre de nous",
+    text: "Parce qu'il y a des souvenirs que j'ai envie de garder pour toujours.",
+    image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    type: "memory",
+    title: "Notre début",
+    text: "Je me souviens encore de cette sensation si particulière au tout début... comme si quelque chose de beau était en train de commencer.",
+    image: "https://images.unsplash.com/photo-1516589091380-5d601aaf1d1e?auto=format&fit=crop&w=1200&q=80",
+    caption: "Remplace ici par une vraie photo de vous",
+  },
+  {
+    type: "memory",
+    title: "Nos moments",
+    text: "Chaque photo avec toi raconte quelque chose que j'aime : ton sourire, notre complicité, et tous les petits instants qui comptent tellement pour moi.",
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    caption: "Ajoute ici une phrase liée au souvenir",
+  },
+  {
+    type: "memory",
+    title: "Ce que j'aime chez toi",
+    text: "Ta douceur, ta façon d'être, la manière dont tu rends tout plus beau sans même t'en rendre compte... c'est ça qui me fait t'aimer encore plus.",
+    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+    caption: "Ici tu peux écrire une vraie petite déclaration",
+  },
+  {
+    type: "memory",
+    title: "Encore plein de pages à écrire",
+    text: "Et le plus beau dans tout ça, c'est qu'on n'est même pas à la fin de l'histoire. J'ai encore envie de vivre mille souvenirs avec toi.",
+    image: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+    caption: "Tu peux finir par une phrase tournée vers le futur",
+  },
+  {
+    type: "final",
+    title: "Bonne fête mon amour ❤️",
+    text: "Merci d'être toi. Merci pour nous. Et merci pour tous les souvenirs déjà créés... et ceux à venir.",
+    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80",
+  },
+];
 
-    .hearts{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index:1;
-    }
-    .fall{
-      position:absolute;
-      top:-70px;
-      animation-name: fall;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      opacity:.95;
-    }
-    @keyframes fall{
-      0%   { transform: translateY(-70px) translateX(0); opacity:0; }
-      10%  { opacity:1; }
-      100% { transform: translateY(540px) translateX(40px); opacity:0; }
-    }
+function Page({ page, isCover = false, side = "right" }) {
+  return (
+    <div
+      className={`relative h-[520px] w-full overflow-hidden rounded-3xl border border-white/30 bg-white shadow-2xl ${
+        isCover ? "" : ""
+      }`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-white to-pink-50" />
 
-    .beat{
-      display:inline-block;
-      animation: beat 1s infinite;
-    }
-    @keyframes beat{
-      0%, 100% { transform: scale(1); }
-      20% { transform: scale(1.25); }
-      40% { transform: scale(1); }
-      60% { transform: scale(1.18); }
-    }
+      <div className="relative grid h-full grid-cols-1 md:grid-cols-2">
+        <div className="relative h-64 md:h-full">
+          <img
+            src={page.image}
+            alt={page.title}
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+          {page.caption && (
+            <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/80 px-4 py-2 text-sm text-gray-700 backdrop-blur-sm">
+              {page.caption}
+            </div>
+          )}
+        </div>
 
-    h1{
-      position:relative;
-      z-index:2;
-      margin:6px 0 18px;
-      color:#d6336c;
-      font-size:34px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-    }
+        <div className="flex h-full flex-col justify-between p-6 md:p-8">
+          <div>
+            <div className="mb-4 flex items-center gap-2 text-rose-500">
+              <Heart className="h-5 w-5 fill-current" />
+              <span className="text-sm font-medium tracking-wide uppercase">
+                {isCover ? "Notre livre" : "Souvenir"}
+              </span>
+            </div>
 
-    p{
-      position:relative;
-      z-index:2;
-      margin:0 auto;
-      max-width:480px;
-      color:#6a1b3a;
-      font-size:18px;
-      line-height:1.5;
-    }
+            <h2 className="mb-3 text-3xl font-semibold leading-tight text-gray-800 md:text-4xl">
+              {page.title}
+            </h2>
 
-    .info{
-      position:relative;
-      z-index:2;
-      margin-top:18px;
-      font-weight:700;
-      color:#8a2250;
-    }
+            {page.subtitle && (
+              <p className="mb-4 text-lg text-rose-600">{page.subtitle}</p>
+            )}
 
-    .btns{
-      position:relative;
-      z-index:2;
-      margin-top:14px;
-      display:flex;
-      gap:16px;
-      justify-content:center;
-    }
+            <p className="text-base leading-8 text-gray-600 md:text-lg">
+              {page.text}
+            </p>
+          </div>
 
-    .btn{
-      padding:12px 26px;
-      border-radius:999px;
-      font-weight:800;
-      border:2px solid #d6336c;
-      cursor:pointer;
-      font-size:16px;
-    }
-
-    .primary{
-      background:#d6336c;
-      color:#fff;
-    }
-
-    .outline{
-      background:#fff;
-      color:#d6336c;
-    }
-
-    .sig{
-      position:relative;
-      z-index:2;
-      margin-top:18px;
-      color:#6a1b3a;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="card">
-
-    <div class="hearts">
-      <div class="fall" style="left:10%; font-size:22px; animation-duration:6s;">💗</div>
-      <div class="fall" style="left:40%; font-size:24px; animation-duration:7s;">💖</div>
-      <div class="fall" style="left:70%; font-size:20px; animation-duration:8s;">💕</div>
+          <div className="flex items-center justify-between pt-6 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <Camera className="h-4 w-4" />
+              <span>{side === "left" ? "Page gauche" : "Page droite"}</span>
+            </div>
+            <span>Avec amour</span>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <h1>
-      <span class="beat">❤️</span>
-      Would you be my Valentine?
-      <span class="beat">❤️</span>
-    </h1>
-
-    <p>
-      Joyeuse Saint-Valentin mon amour 💖<br><br>
-      Même à des milliers de kilomètres,<br>
-      mon cœur bat exactement au même rythme que le tien.
-    </p>
-
-    <!-- LA PHRASE AJOUTÉE ICI -->
-    <div class="info">
-      Merci de cliquer sur le bouton de ton choix 😉 ( 3 fois... )
-    </div>
-
-    <div class="btns">
-      <button class="btn primary" id="yes1">Yes</button>
-      <button class="btn outline" id="yes2">Yes</button>
-    </div>
-
-    <div class="sig">— Joé</div>
-  </div>
-
-<script>
-let step = 0;
-function nextStep(){
-  step++;
-  if(step===1){
-    alert("Are you sure?");
-  } else if(step===2){
-    alert("Are you really sure?");
-  } else {
-    alert("So love me forever 💗");
-  }
+  );
 }
-document.getElementById("yes1").onclick = nextStep;
-document.getElementById("yes2").onclick = nextStep;
-</script>
 
-</body>
-</html>
+export default function RomanticMemoryBook() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = pagesData.length;
+
+  const current = useMemo(() => pagesData[currentPage], [currentPage]);
+  const prevDisabled = currentPage === 0;
+  const nextDisabled = currentPage === totalPages - 1;
+
+  const goNext = () => {
+    if (!nextDisabled) setCurrentPage((p) => p + 1);
+  };
+
+  const goPrev = () => {
+    if (!prevDisabled) setCurrentPage((p) => p - 1);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 px-4 py-10 text-gray-800">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 text-center">
+          <p className="mb-2 text-sm font-medium uppercase tracking-[0.3em] text-rose-500">
+            Memory Book
+          </p>
+          <h1 className="text-4xl font-semibold md:text-6xl">Un livre juste pour elle</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-600 md:text-lg">
+            Remplace les photos, modifie les phrases, et offre-lui une petite expérience interactive pleine de souvenirs.
+          </p>
+        </div>
+
+        <div className="relative mx-auto max-w-5xl perspective-[2000px]">
+          <div className="relative rounded-[2rem] bg-white/40 p-3 shadow-[0_20px_80px_rgba(244,63,94,0.15)] backdrop-blur-xl md:p-5">
+            <div className="pointer-events-none absolute bottom-3 left-8 top-3 w-2 rounded-full bg-gradient-to-b from-rose-200 to-pink-300 opacity-60 md:left-10" />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={{ rotateY: 90, opacity: 0, x: 50 }}
+                animate={{ rotateY: 0, opacity: 1, x: 0 }}
+                exit={{ rotateY: -90, opacity: 0, x: -50 }}
+                transition={{ duration: 0.55 }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <Page page={current} isCover={currentPage === 0} side={currentPage % 2 === 0 ? "right" : "left"} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <button
+            onClick={goPrev}
+            disabled={prevDisabled}
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/60 bg-white/80 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg backdrop-blur transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Page précédente
+          </button>
+
+          <div className="rounded-2xl bg-white/70 px-5 py-3 text-sm text-gray-600 shadow-md backdrop-blur">
+            Page <span className="font-semibold">{currentPage + 1}</span> sur <span className="font-semibold">{totalPages}</span>
+          </div>
+
+          <button
+            onClick={goNext}
+            disabled={nextDisabled}
+            className="inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 text-sm font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Page suivante
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl bg-white/70 p-5 shadow-md backdrop-blur">
+            <h3 className="mb-2 text-lg font-semibold">1. Ajoute vos photos</h3>
+            <p className="text-sm leading-6 text-gray-600">
+              Remplace chaque URL dans <span className="font-mono">pagesData</span> par tes vraies photos.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-white/70 p-5 shadow-md backdrop-blur">
+            <h3 className="mb-2 text-lg font-semibold">2. Personnalise les textes</h3>
+            <p className="text-sm leading-6 text-gray-600">
+              Mets des anecdotes, surnoms, dates, ou petites phrases mignonnes.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-white/70 p-5 shadow-md backdrop-blur">
+            <h3 className="mb-2 text-lg font-semibold">3. Offre-lui le lien</h3>
+            <p className="text-sm leading-6 text-gray-600">
+              Héberge le projet sur GitHub Pages pour qu'elle puisse le découvrir facilement.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
