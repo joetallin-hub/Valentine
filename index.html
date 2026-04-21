@@ -7,35 +7,104 @@
   <style>
     * { box-sizing: border-box; }
 
+    :root {
+      --bg-1: #f5f3d6;
+      --bg-2: #eef0c2;
+      --bg-3: #dbe7a6;
+      --page-left: #f8f6e8;
+      --page-right: #cfdc85;
+      --ink: #31461d;
+      --accent: #8aa543;
+      --accent-dark: #69822f;
+      --soft-shadow: rgba(67, 86, 23, 0.18);
+    }
+
     body {
       margin: 0;
-      font-family: "Georgia", "Times New Roman", serif;
-      background: linear-gradient(135deg, #fff5f7, #ffe4ec, #fff0f5);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #4a2a35;
+      font-family: "Georgia", "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.8), transparent 18%),
+        radial-gradient(circle at 85% 18%, rgba(255,255,255,0.7), transparent 18%),
+        radial-gradient(circle at 10% 80%, rgba(255,255,255,0.55), transparent 16%),
+        radial-gradient(circle at 90% 75%, rgba(255,255,255,0.55), transparent 16%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2), #f3efc8 55%, var(--bg-3));
       overflow-x: hidden;
-      padding: 24px;
+      position: relative;
+      padding: 36px 18px 44px;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 5% 8%, rgba(130, 160, 55, 0.18) 0 2px, transparent 3px),
+        radial-gradient(circle at 93% 10%, rgba(130, 160, 55, 0.14) 0 2px, transparent 3px),
+        radial-gradient(circle at 12% 92%, rgba(130, 160, 55, 0.18) 0 2px, transparent 3px),
+        radial-gradient(circle at 90% 85%, rgba(130, 160, 55, 0.16) 0 2px, transparent 3px);
+      opacity: 0.8;
+    }
+
+    .leaf-corner {
+      position: fixed;
+      width: 220px;
+      height: 220px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .leaf-corner svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .leaf-top-left { top: 0; left: 0; }
+    .leaf-top-right { top: 0; right: 0; transform: scaleX(-1); }
+    .leaf-bottom-left { bottom: 0; left: 0; transform: scaleY(-1); }
+    .leaf-bottom-right { bottom: 0; right: 0; transform: scale(-1); }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .title {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
 
     .title h1 {
       margin: 0;
-      font-size: clamp(2rem, 5vw, 3.6rem);
-      color: #c94f7c;
+      font-size: clamp(2.3rem, 5vw, 4.7rem);
+      line-height: 1.12;
+      color: #284015;
+      font-weight: 700;
     }
 
     .title p {
-      margin-top: 10px;
-      font-size: 1rem;
-      color: #7a5562;
+      margin: 14px auto 0;
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      color: #607336;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    .sparkle {
+      text-align: center;
+      color: #d5b336;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
     }
 
     .book-wrap {
@@ -43,23 +112,54 @@
       flex-direction: column;
       align-items: center;
       gap: 18px;
-      width: 100%;
     }
 
     .book {
       position: relative;
-      width: min(92vw, 900px);
-      height: min(62vw, 580px);
-      min-height: 420px;
+      width: min(94vw, 1050px);
+      height: min(65vw, 640px);
+      min-height: 440px;
       perspective: 2500px;
+      filter: drop-shadow(0 24px 30px rgba(76, 91, 30, 0.12));
+    }
+
+    .left-static,
+    .page-face {
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.75);
+      box-shadow: 0 16px 36px rgba(101, 118, 37, 0.1);
+    }
+
+    .left-static {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: var(--page-left);
+      z-index: 0;
+      border-radius: 28px 0 0 28px;
+    }
+
+    .spine {
+      position: absolute;
+      left: calc(50% - 8px);
+      top: 0;
+      width: 16px;
+      height: 100%;
+      z-index: 20;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #a5bc52, #79972f, #a5bc52);
+      box-shadow: 0 0 14px rgba(112, 137, 48, 0.28);
     }
 
     .page {
       position: absolute;
-      width: 50%;
-      height: 100%;
       top: 0;
       left: 50%;
+      width: 50%;
+      height: 100%;
       transform-origin: left;
       transform-style: preserve-3d;
       transition: transform 1s ease;
@@ -75,62 +175,68 @@
       position: absolute;
       inset: 0;
       backface-visibility: hidden;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow: 0 18px 40px rgba(120, 50, 80, 0.12);
+      background: var(--page-left);
     }
 
     .front {
-      background: #fffafc;
-      border-radius: 0 20px 20px 0;
+      border-radius: 0 28px 28px 0;
     }
 
     .back {
-      background: #fffafc;
       transform: rotateY(180deg);
-      border-radius: 20px 0 0 20px;
+      border-radius: 28px 0 0 28px;
+      background: var(--page-left);
+    }
+
+    .cover-front,
+    .cover-back,
+    .end-page {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 42px;
     }
 
     .cover-front {
-      background: linear-gradient(145deg, #f8b8cc, #f48fb1, #ec6f98);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 30px;
+      background: linear-gradient(135deg, #bfd36d, #cddd84, #a9c356);
+      color: #253914;
     }
 
     .cover-front h2 {
-      font-size: clamp(2rem, 4vw, 3rem);
-      margin: 0 0 10px;
+      margin: 0 0 18px;
+      font-size: clamp(2.1rem, 4vw, 3.9rem);
+      line-height: 1.15;
     }
 
-    .cover-front p {
-      font-size: 1.05rem;
-      max-width: 280px;
-      line-height: 1.6;
+    .cover-front p,
+    .cover-back p,
+    .end-page p {
+      margin: 0;
+      font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+      line-height: 1.7;
+      max-width: 420px;
     }
 
     .cover-back,
     .end-page {
-      background: linear-gradient(180deg, #fff8fb, #ffeef4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 30px;
-      color: #9a4d6a;
-      font-size: 1.15rem;
-      line-height: 1.8;
+      background: linear-gradient(180deg, #faf8e6, #edf0c8);
+      color: #425a21;
+    }
+
+    .decor {
+      font-size: 2rem;
+      color: #8eab42;
+      margin: 0 0 20px;
     }
 
     .memory {
       display: grid;
       grid-template-rows: 58% 42%;
       height: 100%;
-      background: #fff;
+      background: var(--page-left);
     }
 
     .memory img {
@@ -138,247 +244,287 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      background: linear-gradient(135deg, #ebeed0, #d6dfab);
     }
 
     .memory-text {
-      padding: 20px;
+      padding: 26px 28px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 10px;
-      background: linear-gradient(180deg, #fff, #fff6f9);
+      background: linear-gradient(180deg, #fcfbef, #f3f1da);
     }
 
     .memory-text h3 {
       margin: 0;
-      font-size: 1.5rem;
-      color: #c44c79;
+      font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+      color: #35501a;
+      line-height: 1.15;
     }
 
     .memory-text p {
       margin: 0;
-      font-size: 0.98rem;
-      line-height: 1.7;
-      color: #6d4a56;
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      line-height: 1.65;
+      color: #44572a;
     }
 
     .memory-text .caption {
-      font-size: 0.88rem;
-      color: #b06a86;
+      margin-top: 4px;
+      font-size: 0.95rem;
       font-style: italic;
-    }
-
-    .left-static {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 50%;
-      height: 100%;
-      border-radius: 20px 0 0 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow: 0 18px 40px rgba(120, 50, 80, 0.12);
-      background: #fffafc;
-      z-index: 0;
-    }
-
-    .spine {
-      position: absolute;
-      left: calc(50% - 6px);
-      top: 0;
-      width: 12px;
-      height: 100%;
-      background: linear-gradient(180deg, #f4a3bd, #e97da2, #f4a3bd);
-      border-radius: 999px;
-      z-index: 30;
-      box-shadow: 0 0 18px rgba(233, 125, 162, 0.3);
+      color: #7c8f49;
     }
 
     .controls {
       display: flex;
-      gap: 14px;
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
     }
 
     button {
       border: none;
-      background: #d85b89;
-      color: white;
-      padding: 12px 18px;
+      padding: 14px 26px;
       border-radius: 999px;
-      font-size: 0.95rem;
+      background: linear-gradient(135deg, #f4e28f, #efd66f);
+      color: #425220;
+      font-family: inherit;
+      font-size: 1.05rem;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(216, 91, 137, 0.25);
-      transition: transform 0.2s ease, opacity 0.2s ease;
+      box-shadow: 0 8px 20px rgba(126, 136, 53, 0.16);
+      transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
     }
 
-    button:hover { transform: translateY(-2px); }
-    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(126, 136, 53, 0.2);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
     .counter {
-      background: rgba(255,255,255,0.7);
-      padding: 10px 16px;
+      min-width: 110px;
+      text-align: center;
+      padding: 12px 18px;
       border-radius: 999px;
-      color: #7a5562;
-      font-size: 0.95rem;
+      background: rgba(255,255,255,0.55);
+      color: #53672b;
+      font-size: 1.05rem;
       backdrop-filter: blur(6px);
     }
 
+    .footer-note {
+      text-align: center;
+      margin-top: 6px;
+      color: #52662b;
+      font-size: 1.15rem;
+    }
+
+    .footer-note span { color: #d85d4a; }
+
     .tips {
-      width: min(92vw, 900px);
-      margin-top: 10px;
-      background: rgba(255,255,255,0.65);
-      border-radius: 22px;
-      padding: 18px 20px;
-      color: #7a5562;
+      width: min(94vw, 1050px);
+      padding: 18px 22px;
+      background: rgba(255,255,255,0.35);
+      border-radius: 20px;
+      color: #5a6c32;
       line-height: 1.7;
-      box-shadow: 0 10px 30px rgba(120, 50, 80, 0.08);
+      box-shadow: 0 8px 24px rgba(110, 124, 44, 0.08);
+      display: none;
     }
 
-    .tips code {
-      background: rgba(255,255,255,0.9);
-      padding: 2px 8px;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
       .book {
         height: 72vh;
-        min-height: 480px;
       }
 
-      .memory-text h3 {
-        font-size: 1.2rem;
+      .memory-text {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 24px 10px 30px;
       }
 
-      .memory-text p {
-        font-size: 0.9rem;
-        line-height: 1.55;
+      .book {
+        width: 96vw;
+        min-height: 500px;
+      }
+
+      .leaf-corner {
+        width: 140px;
+        height: 140px;
+        opacity: 0.55;
+      }
+
+      button {
+        padding: 12px 18px;
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="title">
-    <h1>Pour toi ❤️</h1>
-    <p>Un petit livre de souvenirs à tourner page après page</p>
+  <div class="leaf-corner leaf-top-left">
+    <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 18C48 26 74 46 92 76" stroke="#8CAA43" stroke-width="4" stroke-linecap="round"/>
+      <path d="M52 34C42 18 26 10 8 8" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 58C60 40 44 34 24 32" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M88 86C72 72 56 66 38 66" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="28" cy="18" rx="13" ry="28" transform="rotate(-36 28 18)" fill="#CFE07C"/>
+      <ellipse cx="54" cy="40" rx="13" ry="28" transform="rotate(-28 54 40)" fill="#B7CF66"/>
+      <ellipse cx="74" cy="66" rx="13" ry="28" transform="rotate(-20 74 66)" fill="#DCE897"/>
+      <ellipse cx="90" cy="94" rx="13" ry="28" transform="rotate(-8 90 94)" fill="#AEC75B"/>
+    </svg>
+  </div>
+  <div class="leaf-corner leaf-top-right">
+    <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 18C48 26 74 46 92 76" stroke="#8CAA43" stroke-width="4" stroke-linecap="round"/>
+      <path d="M52 34C42 18 26 10 8 8" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 58C60 40 44 34 24 32" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M88 86C72 72 56 66 38 66" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="28" cy="18" rx="13" ry="28" transform="rotate(-36 28 18)" fill="#CFE07C"/>
+      <ellipse cx="54" cy="40" rx="13" ry="28" transform="rotate(-28 54 40)" fill="#B7CF66"/>
+      <ellipse cx="74" cy="66" rx="13" ry="28" transform="rotate(-20 74 66)" fill="#DCE897"/>
+      <ellipse cx="90" cy="94" rx="13" ry="28" transform="rotate(-8 90 94)" fill="#AEC75B"/>
+    </svg>
+  </div>
+  <div class="leaf-corner leaf-bottom-left">
+    <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 18C48 26 74 46 92 76" stroke="#8CAA43" stroke-width="4" stroke-linecap="round"/>
+      <path d="M52 34C42 18 26 10 8 8" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 58C60 40 44 34 24 32" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M88 86C72 72 56 66 38 66" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="28" cy="18" rx="13" ry="28" transform="rotate(-36 28 18)" fill="#CFE07C"/>
+      <ellipse cx="54" cy="40" rx="13" ry="28" transform="rotate(-28 54 40)" fill="#B7CF66"/>
+      <ellipse cx="74" cy="66" rx="13" ry="28" transform="rotate(-20 74 66)" fill="#DCE897"/>
+      <ellipse cx="90" cy="94" rx="13" ry="28" transform="rotate(-8 90 94)" fill="#AEC75B"/>
+    </svg>
+  </div>
+  <div class="leaf-corner leaf-bottom-right">
+    <svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 18C48 26 74 46 92 76" stroke="#8CAA43" stroke-width="4" stroke-linecap="round"/>
+      <path d="M52 34C42 18 26 10 8 8" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 58C60 40 44 34 24 32" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <path d="M88 86C72 72 56 66 38 66" stroke="#A8C85A" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="28" cy="18" rx="13" ry="28" transform="rotate(-36 28 18)" fill="#CFE07C"/>
+      <ellipse cx="54" cy="40" rx="13" ry="28" transform="rotate(-28 54 40)" fill="#B7CF66"/>
+      <ellipse cx="74" cy="66" rx="13" ry="28" transform="rotate(-20 74 66)" fill="#DCE897"/>
+      <ellipse cx="90" cy="94" rx="13" ry="28" transform="rotate(-8 90 94)" fill="#AEC75B"/>
+    </svg>
   </div>
 
-  <div class="book-wrap">
-    <div class="book" id="book">
-      <div class="left-static" id="leftPage"></div>
-      <div class="spine"></div>
-
-      <div class="page" id="page1" style="z-index: 6;">
-        <div class="page-face front cover-front">
-          <h2>Notre livre</h2>
-          <p>
-            J'avais envie de créer quelque chose de doux, simple et beau,
-            juste pour nous.
-          </p>
-        </div>
-        <div class="page-face back cover-back">
-          <div>
-            Chaque page raconte un petit morceau de nous.<br />
-            Tourne-les doucement 💌
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page2" style="z-index: 5;">
-        <div class="page-face front">
-          <div class="memory">
-            <img src="https://images.unsplash.com/photo-1516589091380-5d601aaf1d1e?auto=format&fit=crop&w=1200&q=80" alt="souvenir 1" />
-            <div class="memory-text">
-              <h3>Notre début</h3>
-              <p>
-                Je me souviens encore de cette sensation toute particulière au début,
-                quand tout devenait plus beau dès qu'il y avait un peu de toi dedans.
-              </p>
-              <div class="caption">Remplace cette photo par l'une de vous deux</div>
-            </div>
-          </div>
-        </div>
-        <div class="page-face back">
-          <div class="memory">
-            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80" alt="souvenir 2" />
-            <div class="memory-text">
-              <h3>Nos moments</h3>
-              <p>
-                Il y a des instants avec toi qui paraissent simples, mais que j'ai envie
-                de garder pour toujours tellement ils comptent pour moi.
-              </p>
-              <div class="caption">Ajoute ici une anecdote vraie</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page3" style="z-index: 4;">
-        <div class="page-face front">
-          <div class="memory">
-            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80" alt="souvenir 3" />
-            <div class="memory-text">
-              <h3>Ce que j'aime chez toi</h3>
-              <p>
-                Ton sourire, ta douceur, ta façon de rendre les choses plus légères,
-                et tous ces petits détails chez toi que j'aime énormément.
-              </p>
-              <div class="caption">Tu peux écrire ici quelque chose de très personnel</div>
-            </div>
-          </div>
-        </div>
-        <div class="page-face back">
-          <div class="memory">
-            <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80" alt="souvenir 4" />
-            <div class="memory-text">
-              <h3>Nous deux</h3>
-              <p>
-                Ce que je préfère finalement, ce n'est pas juste un souvenir précis,
-                c'est tout ce qu'il y a quand on est ensemble.
-              </p>
-              <div class="caption">Mets ici une photo qui a vraiment du sens pour vous</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page4" style="z-index: 3;">
-        <div class="page-face front">
-          <div class="memory">
-            <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80" alt="souvenir 5" />
-            <div class="memory-text">
-              <h3>Encore plein de pages à écrire</h3>
-              <p>
-                Et le plus beau, c'est qu'on n'est pas à la fin de l'histoire. J'ai encore
-                envie de vivre plein de moments avec toi.
-              </p>
-              <div class="caption">Phrase tournée vers le futur</div>
-            </div>
-          </div>
-        </div>
-        <div class="page-face back end-page">
-          <div>
-            Merci pour nous ❤️<br /><br />
-            Et bonne fête mon amour.
-          </div>
-        </div>
-      </div>
+  <div class="container">
+    <div class="title">
+      <h1>Je te souhaite une joyeuse fête, mon amour de ma vie. 💚</h1>
+      <p>Je t'ai codé un petit remède anti-coup de mou pour te remémorer de doux souvenirs.</p>
     </div>
 
-    <div class="controls">
-      <button id="prevBtn">← Page précédente</button>
-      <div class="counter" id="counter">Page 1 sur 5</div>
-      <button id="nextBtn">Page suivante →</button>
-    </div>
+    <div class="sparkle">☀︎</div>
 
-    <div class="tips">
-      <strong>À personnaliser :</strong><br />
-      remplace chaque lien dans <code>src="..."</code> par tes photos,<br />
-      et modifie les titres/phrases directement dans le fichier.<br /><br />
-      Astuce : si tu veux rajouter des pages, duplique simplement un bloc <code>&lt;div class="page"&gt;</code>.
+    <div class="book-wrap">
+      <div class="book">
+        <div class="left-static" id="leftPage"></div>
+        <div class="spine"></div>
+
+        <div class="page" id="page1" style="z-index: 6;">
+          <div class="page-face front cover-front">
+            <div class="decor">❀</div>
+            <h2>Je te souhaite une joyeuse fête, mon amour de ma vie.</h2>
+            <p>Je t'ai codé un petit remède anti-coup de mou pour te remémorer de doux souvenirs.</p>
+          </div>
+          <div class="page-face back cover-back">
+            <div class="decor">♡</div>
+            <p>Il était une fois, le premier contact d'un cancre avec une première de classe.</p>
+          </div>
+        </div>
+
+        <div class="page" id="page2" style="z-index: 5;">
+          <div class="page-face front">
+            <div class="memory">
+              <img src="https://images.unsplash.com/photo-1516589091380-5d601aaf1d1e?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 1" />
+              <div class="memory-text">
+                <h3>Notre début</h3>
+                <p>Qui aurait cru que de banals messages Instagram pouvaient mener à une relation des plus incroyables...</p>
+                <div class="caption">On remplacera cette photo après</div>
+              </div>
+            </div>
+          </div>
+          <div class="page-face back">
+            <div class="memory">
+              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 2" />
+              <div class="memory-text">
+                <h3>Pour le meilleur et pour le pire...</h3>
+                <p>Ta douceur et ta bienveillance ont trahi tes intentions. C'est ainsi que mon cœur, vers le tien, a pris la direction.</p>
+                <div class="caption">On remplacera cette photo après</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page3" style="z-index: 4;">
+          <div class="page-face front">
+            <div class="memory">
+              <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 3" />
+              <div class="memory-text">
+                <h3>Ce que j'aime chez toi</h3>
+                <p>Absolument tout. Je t'aime dans ta finitude, les jours ensoleillés comme les jours de pleine lune...</p>
+                <div class="caption">On remplacera cette photo après</div>
+              </div>
+            </div>
+          </div>
+          <div class="page-face back">
+            <div class="memory">
+              <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 4" />
+              <div class="memory-text">
+                <h3>Encore plein de pages à écrire</h3>
+                <p>Et le plus beau, c'est qu'on n'est pas à la fin de l'histoire. J'ai encore envie de vivre plein de moments avec toi.</p>
+                <div class="caption">Phrase tournée vers le futur</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page4" style="z-index: 3;">
+          <div class="page-face front">
+            <div class="memory">
+              <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 5" />
+              <div class="memory-text">
+                <h3>Encore plein de pages à écrire</h3>
+                <p>Et le plus beau, c'est qu'on n'est pas à la fin de l'histoire. J'ai encore envie de vivre plein de moments avec toi.</p>
+                <div class="caption">Phrase tournée vers le futur</div>
+              </div>
+            </div>
+          </div>
+          <div class="page-face back end-page">
+            <div class="decor">❤</div>
+            <p>Merci pour nous.<br /><br />Et bonne fête, mon gremlins.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="prevBtn">← Précédent</button>
+        <div class="counter" id="counter">1 / 5</div>
+        <button id="nextBtn">Suivant →</button>
+      </div>
+
+      <div class="footer-note">Fait avec <span>❤</span> pour mon gremlins 🌿</div>
+
+      <div class="tips">
+        Remplace ensuite les liens des <code>src="..."</code> par vos vraies photos.
+      </div>
     </div>
   </div>
 
@@ -398,16 +544,16 @@
     let current = 0;
 
     const leftStates = [
-      `<div class="cover-back"><div>Chaque page raconte un petit morceau de nous.<br />Tourne-les doucement 💌</div></div>`,
-      `<div class="memory"><img src="https://images.unsplash.com/photo-1516589091380-5d601aaf1d1e?auto=format&fit=crop&w=1200&q=80" alt="souvenir 1" /><div class="memory-text"><h3>Notre début</h3><p>Je me souviens encore de cette sensation toute particulière au début, quand tout devenait plus beau dès qu'il y avait un peu de toi dedans.</p><div class="caption">Remplace cette photo par l'une de vous deux</div></div></div>`,
-      `<div class="memory"><img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80" alt="souvenir 3" /><div class="memory-text"><h3>Ce que j'aime chez toi</h3><p>Ton sourire, ta douceur, ta façon de rendre les choses plus légères, et tous ces petits détails chez toi que j'aime énormément.</p><div class="caption">Tu peux écrire ici quelque chose de très personnel</div></div></div>`,
-      `<div class="memory"><img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80" alt="souvenir 5" /><div class="memory-text"><h3>Encore plein de pages à écrire</h3><p>Et le plus beau, c'est qu'on n'est pas à la fin de l'histoire. J'ai encore envie de vivre plein de moments avec toi.</p><div class="caption">Phrase tournée vers le futur</div></div></div>`,
-      `<div class="end-page"><div>Merci pour nous ❤️<br /><br />Et bonne fête mon amour.</div></div>`
+      `<div class="cover-back"><div class="decor">♡</div><p>Il était une fois, le premier contact d'un cancre avec une première de classe.</p></div>`,
+      `<div class="cover-back"><div class="decor">♡</div><p>Il était une fois, le premier contact d'un cancre avec une première de classe.</p></div>`,
+      `<div class="memory"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 2" /><div class="memory-text"><h3>Pour le meilleur et pour le pire...</h3><p>Ta douceur et ta bienveillance ont trahi tes intentions. C'est ainsi que mon cœur, vers le tien, a pris la direction.</p><div class="caption">On remplacera cette photo après</div></div></div>`,
+      `<div class="memory"><img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80" alt="Souvenir 4" /><div class="memory-text"><h3>Encore plein de pages à écrire</h3><p>Et le plus beau, c'est qu'on n'est pas à la fin de l'histoire. J'ai encore envie de vivre plein de moments avec toi.</p><div class="caption">Phrase tournée vers le futur</div></div></div>`,
+      `<div class="end-page"><div class="decor">❤</div><p>Merci pour nous.<br /><br />Et bonne fête, mon gremlins.</p></div>`
     ];
 
     function renderLeftPage() {
       leftPage.innerHTML = leftStates[current];
-      counter.textContent = `Page ${current + 1} sur 5`;
+      counter.textContent = `${current + 1} / 5`;
       prevBtn.disabled = current === 0;
       nextBtn.disabled = current === pages.length;
     }
